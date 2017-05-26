@@ -1,0 +1,4 @@
+---
+# Rebooting hosts if needed is turned of by default
+sys_upgrade_reboot: false
+sys_upgrade_reboot_required: false

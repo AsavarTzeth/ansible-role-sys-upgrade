@@ -1,0 +1,10 @@
+---
+- name: check if reboot is required
+  stat: path=/var/run/reboot-required
+  become: false
+  register: deb_needs_reboot
+
+- name: reboot required
+  set_fact: sys_upgrade_reboot_required=true
+  when: deb_needs_reboot.stat.exists
+  become: false

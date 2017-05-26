@@ -1,0 +1,13 @@
+---
+# TODO Further research 'tracer' or 'dnf needs-restarting'
+
+- name: check if reboot is required
+  shell: rpm -q --last kernel | head -1 | cut -d' ' -f1 | cut -d'-' -f2,3
+  changed_when: false
+  become: false
+  register: installed_kernel
+
+- name: reboot required
+  set_fact: sys_upgrade_reboot_required=true
+  when: ansible_kernel != installed_kernel.stdout
+  become: false

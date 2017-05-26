@@ -1,0 +1,41 @@
+galaxy_info:
+  author: Patrik Nilsson
+  description: package upgrade role
+  license: BSD
+  min_ansible_version: 2.2
+
+  platforms:
+    - name: Alpine
+      versions:
+        - all
+        - any
+    - name: ArchLinux
+      versions:
+        - all
+        - any
+    - name: Debian
+      versions:
+        - all
+        - any
+    - name: EL
+      versions:
+        - 6.9
+        - 7
+    - name: Fedora
+      versions:
+        - 25
+    - name: opensuse
+      versions:
+        - 14.2
+        - any
+    - name: Ubuntu
+      versions:
+        - all
+        - any
+    - name: Void Linux
+        - all
+        - any
+
+  galaxy_tags: ['package','upgrade','update','reboot']
+
+dependencies: []

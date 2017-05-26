@@ -1,0 +1,11 @@
+---
+- name: check if reboot is required
+  shell: pacman -Q linux | cut -d' ' -f1 | sed -r 's/(.*)/\1-ARCH/'
+  changed_when: false
+  become: false
+  register: installed_kernel
+
+- name: reboot required
+  set_fact: sys_upgrade_reboot_required=true
+  when: ansible_kernel != installed_kernel.stdout
+  become: false

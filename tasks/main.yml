@@ -1,0 +1,61 @@
+---
+- block:
+  # Ensure pre-requisite facts are available
+  - name: detect package manager
+    setup: gather_subset=!all
+    async: 30
+    poll: 5
+    when: ansible_pkg_mgr is undefined
+
+  # Include packaging module options
+  - include_vars:
+      name: opt
+      dir: vars/mod_options
+      files_matching: "{{ ansible_pkg_mgr }}.yml"
+
+  # No universal syntax for upgrading all packages
+  - name: upgrade all packages
+    package:
+      name: "{{ opt.name | default(omit) }}"
+      state: "{{ opt.state | default(omit) }}"
+      upgrade: "{{ opt.upgrade | default(omit) }}"
+      update_cache: "{{ opt.update_cache | default(omit) }}"
+      cache_valid_time: "{{ opt.cache_valid_time | default(omit) }}"
+    async: 600
+    become: true
+
+  # If reboots are allowed, reboot as neccessary
+  - block:
+    # Checking if reboot is required is tricky. Will use distribution provided
+    # method and fallback to comparing running kernel with installed one.
+    - include: "{{ item }}"
+      with_first_found:
+        - files:
+            - "{{ ansible_pkg_mgr }}.yml"
+          skip: true
+
+    # TODO When a reboot module/action plugin is availble, use that instead
+
+    # Reboot hosts as required and wait for them to finish
+    - name: reboot
+      shell: sleep 2 && /sbin/shutdown -r now "Ansible reboot"
+      async: 1
+      poll: 0
+      ignore_errors: true
+      when: sys_upgrade_reboot_required
+      become: true
+
+    - name: wait for host to reboot
+      local_action: wait_for
+      args:
+        host: "{{ ansible_host | default(inventory_hostname) }}"
+        port: 22
+        delay: 10
+        timeout: 300
+      when: sys_upgrade_reboot_required
+
+    when: sys_upgrade_reboot
+    tags: reboot
+
+  become: false
+  tags: upgrade,update,sys-upgrade
