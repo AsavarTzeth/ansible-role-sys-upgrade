@@ -34,25 +34,11 @@
             - "{{ ansible_pkg_mgr }}.yml"
           skip: true
 
-    # TODO When a reboot module/action plugin is availble, use that instead
-
-    # Reboot hosts as required and wait for them to finish
     - name: reboot
-      shell: sleep 2 && /sbin/shutdown -r now "Ansible reboot"
-      async: 1
-      poll: 0
-      ignore_errors: true
+      reboot:
+        reboot_timeout: 3600
       when: sys_upgrade_reboot_required
       become: true
-
-    - name: wait for host to reboot
-      local_action: wait_for
-      args:
-        host: "{{ ansible_host | default(inventory_hostname) }}"
-        port: 22
-        delay: 10
-        timeout: 300
-      when: sys_upgrade_reboot_required
 
     when: sys_upgrade_reboot
     tags: reboot
